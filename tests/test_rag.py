@@ -90,6 +90,16 @@ def test_empty_question_is_rejected_before_retrieval():
     assert backend.seen_messages == []
 
 
+def test_empty_generation_counts_as_a_refusal():
+    retriever = make_retriever(["some text here"])
+    assistant = Assistant(StubBackend(reply=""), retriever, min_score=0.0)
+
+    answer = assistant.ask("some text")
+
+    assert answer.text == config.REFUSAL_MESSAGE
+    assert answer.refused
+
+
 def test_model_refusal_is_detected():
     retriever = make_retriever(["some text here"])
     assistant = Assistant(StubBackend(reply=config.REFUSAL_MESSAGE), retriever, min_score=0.0)

@@ -60,15 +60,27 @@ ingest, arka planda model indirmesi varken 677 sn sürdü.
 - **Bilgi tabanı içeriği:** Foundry Local / RAG / embedding / SQLite konuları. Asistan
   kendi teknolojisini anlatıyor — demoda etkileyici ve public repoda paylaşımı güvenli.
 
+## Ölçülen sonuçlar (12 Ağustos 2026)
+
+- Index: 55 pasaj, 7 doküman, 1024 boyut
+- Retrieval hit@3: 17/17 · cevap doğruluğu: 17/17 · kapsam dışı reddetme: 5/5
+- Benzerlik ayrımı: cevaplanabilir min 0.624, kapsam dışı max 0.552 → eşik 0.60
+- Model seçimi: qwen2.5-1.5b (medyan 3-6 sn). phi-3.5-mini aynı kalite, ~5 kat yavaş (16 sn)
+- Testler: 41 birim (modelsiz) + 4 entegrasyon (gerçek model)
+- Ağ: `lsof` ile ölçüldü — cevap üretilirken dış bağlantı YOK; SDK modeli katalogda
+  çözerken 2, yüklerken 1 HTTPS bağlantısı açıyor
+
 ## Kaldığımız yer
 
 - [x] Ortam kurulumu + Foundry Local smoke testi (GEÇTİ)
 - [x] Repo iskeleti + kural dosyaları
-- [ ] Bilgi tabanı dökümanları
-- [ ] Çekirdek pipeline (chunking / store / ingest / retrieve)
-- [ ] RAG katmanı + CLI + Streamlit
-- [ ] Değerlendirme ve ayar
-- [ ] Dökümantasyon + video scripti
+- [x] Bilgi tabanı dökümanları (7 dosya)
+- [x] Çekirdek pipeline (chunking / store / ingest / retrieve)
+- [x] RAG katmanı + CLI + Streamlit
+- [x] Değerlendirme ve ayar → `docs/EVALUATION.md`
+- [x] Dökümantasyon + video scripti
+- [x] Çapraz model incelemesi (Gemini) → 3 gerçek hata bulundu ve düzeltildi
+- [ ] **Wi-Fi kapalı offline testi (Ali Wi-Fi'ı kapatınca yapılacak)**
 - [ ] Video çekimi (Ali) → linki README'ye
 
 Güncel görev listesi: `tasks.md`

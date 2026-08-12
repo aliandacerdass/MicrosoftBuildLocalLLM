@@ -38,7 +38,7 @@ wrong you can tell whether retrieval or generation failed, instead of guessing.
 
 ## Design decisions and why
 
-**SQLite plus numpy instead of a vector database.** The index is 54 passages. Loading all
+**SQLite plus numpy instead of a vector database.** The index is 55 passages. Loading all
 the vectors into memory and scoring them with one matrix product takes about 27
 milliseconds. A dedicated vector store would add a dependency and buy nothing at this
 scale.
@@ -92,8 +92,8 @@ On an Apple M4 (CPU inference, no GPU execution provider registered):
 
 | Step | Time |
 |---|---|
-| Retrieval (embed the query plus search 54 passages) | 27-80 ms |
-| Answer generation | median 3-4 s with qwen2.5-1.5b, 16 s with phi-3.5-mini |
+| Retrieval (embed the query plus search 55 passages) | 27-100 ms |
+| Answer generation | median 3-6 s with qwen2.5-1.5b, 16 s with phi-3.5-mini |
 | Loading a cached model | 1.6-3.3 s |
 | Downloading a model (one-time) | 5-9 minutes each |
 

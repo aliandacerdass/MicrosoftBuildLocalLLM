@@ -76,6 +76,20 @@ def test_document_without_headings_still_produces_a_chunk():
     assert chunks[0].heading == ""
 
 
+def test_title_is_not_duplicated_in_a_document_without_subheadings():
+    # The title is prepended to every chunk, so it must not also remain in the body.
+    chunks = chunk_markdown("flat.md", "# Only A Title\n\nOne paragraph of body text.")
+    assert chunks[0].text.count("Only A Title") == 1
+
+
+def test_many_short_paragraphs_respect_the_target_size():
+    # Counting only paragraph lengths would ignore the "\n\n" joins and overshoot.
+    body = "\n\n".join(f"- list item number {i}" for i in range(40))
+    chunks = chunk_markdown("list.md", f"# T\n\n## S\n\n{body}", target_chars=200, overlap_chars=0)
+    for chunk in chunks:
+        assert len(chunk.text.split("\n\n", 1)[1]) <= 200
+
+
 def test_label_is_citable():
     chunks = chunk_markdown("doc.md", DOC)
     catalog = next(c for c in chunks if c.heading == "The catalog")

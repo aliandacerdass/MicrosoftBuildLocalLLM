@@ -29,9 +29,15 @@ def print_sources(answer: Answer, show_text: bool) -> None:
 
 def ask_once(assistant: Assistant, question: str, show_context: bool) -> Answer:
     print("\n", end="")
-    answer = assistant.ask(question, on_token=lambda t: print(t, end="", flush=True))
-    if not answer.generation_ms:
-        # Refused before generation, so nothing was streamed.
+    streamed: list[str] = []
+
+    def show(token: str) -> None:
+        streamed.append(token)
+        print(token, end="", flush=True)
+
+    answer = assistant.ask(question, on_token=show)
+    if not "".join(streamed).strip():
+        # Refused before generation, or the model produced nothing at all.
         print(answer.text, end="")
     print()
     print_sources(answer, show_context)

@@ -165,7 +165,7 @@ scope) — see [docs/EVALUATION.md](docs/EVALUATION.md) for the method and the f
 ## Testing
 
 ```bash
-pytest                 # 38 unit tests, no model download needed
+pytest                 # 41 unit tests, no model download needed
 pytest -m slow -v      # end-to-end tests against the real models
 ```
 

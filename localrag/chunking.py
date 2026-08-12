@@ -37,7 +37,9 @@ def _sections(markdown: str) -> list[tuple[str, str]]:
     """Split a document into ``(heading, body)`` pairs, in document order."""
     matches = list(_HEADING.finditer(markdown))
     if not matches:
-        return [("", markdown.strip())]
+        # Same reason as below: the title is prepended to every chunk, so leaving
+        # it in the body would repeat it.
+        return [("", _TITLE.sub("", markdown, count=1).strip())]
 
     sections: list[tuple[str, str]] = []
     # The H1 title is dropped here because it is prepended to every chunk later;
@@ -113,15 +115,17 @@ def _split_long(body: str, target: int, overlap: int) -> list[str]:
     current: list[str] = []
     length = 0
 
+    # The separators are counted too: a section of many short paragraphs would
+    # otherwise overshoot the target by two characters per join.
     for paragraph in paragraphs:
-        if current and length + len(paragraph) > target:
+        if current and length + len(paragraph) + 2 > target:
             pieces.append("\n\n".join(current))
             tail = _overlap_tail(pieces[-1], overlap)
             current = [tail, paragraph] if tail else [paragraph]
-            length = len(tail) + len(paragraph)
+            length = len(tail) + len(paragraph) + (2 if tail else 0)
         else:
             current.append(paragraph)
-            length += len(paragraph)
+            length += len(paragraph) + 2
 
     if current:
         pieces.append("\n\n".join(current))

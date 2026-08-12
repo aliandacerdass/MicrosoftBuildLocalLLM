@@ -149,10 +149,12 @@ class Assistant:
                 on_token(token)
         generation_ms = (time.perf_counter() - started) * 1000
 
-        text = "".join(parts).strip()
+        # An empty generation is treated as a refusal: better to say nothing is
+        # known than to hand the interfaces a blank answer.
+        text = "".join(parts).strip() or config.REFUSAL_MESSAGE
         return Answer(
             question=question,
-            text=text or config.REFUSAL_MESSAGE,
+            text=text,
             sources=sources,
             refused=config.REFUSAL_MESSAGE.lower() in text.lower(),
             retrieval_ms=retrieval_ms,

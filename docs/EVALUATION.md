@@ -34,7 +34,7 @@ python tests/eval/run_eval.py --retrieval-only   # retrieval only, no chat model
 ## Results
 
 Configuration: `qwen2.5-1.5b` chat model, `qwen3-embedding-0.6b` embeddings (1024
-dimensions), `top_k = 3`, `min_score = 0.60`, 54 indexed passages. Apple M4, CPU inference.
+dimensions), `top_k = 3`, `min_score = 0.60`, 55 indexed passages. Apple M4, CPU inference.
 
 | Metric | Result |
 |---|---|
@@ -43,7 +43,7 @@ dimensions), `top_k = 3`, `min_score = 0.60`, 54 indexed passages. Apple M4, CPU
 | Out-of-scope questions refused | **5/5 (100%)** |
 | Answerable questions wrongly refused | **0/17 (0%)** |
 | Median retrieval time | 27 ms isolated, 70 ms with the chat model also resident |
-| Median generation time | 3.3-4.3 s (varies between runs) |
+| Median generation time | 3.3-5.8 s (varies noticeably between runs) |
 
 ## Choosing the refusal threshold
 
@@ -94,6 +94,16 @@ float32-versus-JSON question with an invented figure ("around 4000 bytes for JSO
 smaller" fact was retrievable and the answer became correct. A reminder that in RAG, the
 first thing to check after a bad answer is what was retrieved.
 
+**4. A cross-model review found three real bugs.** The diff was reviewed by a different
+model family (Gemini, via the Antigravity CLI) and every finding was checked against the
+code. Three held: a document with no subheadings had its title duplicated inside the chunk;
+the chunk-size accounting ignored the two-character paragraph separators and could overshoot
+the target on lists; and an empty generation produced the refusal *text* while reporting
+`refused = False`, which the CLI then printed as a blank line. One finding was a false
+positive (the chunk text embeds its heading, so identical bodies under different headings
+already hash differently). All three fixes carry tests, and the evaluation was re-run after
+them with identical results.
+
 ## Honest limits of these numbers
 
 - **22 questions is a small set.** It is enough to catch systematic failures, not enough to
@@ -109,7 +119,7 @@ first thing to check after a bad answer is what was retrieved.
 ## Model choice
 
 `qwen2.5-1.5b` is the default: it answers the whole evaluation set correctly at a median of
-3.3 to 4.3 seconds per answer on CPU, depending on the run.
+3.3 to 5.8 seconds per answer on CPU, depending on the run.
 
 Two smaller/larger alternatives were considered:
 

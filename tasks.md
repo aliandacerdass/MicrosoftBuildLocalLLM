@@ -10,41 +10,41 @@ Durum: `[ ]` yapılacak · `[~]` devam ediyor · `[x]` bitti
 
 ## Faz 1 — Bilgi tabanı
 
-- [ ] `data/docs/` altına 6–8 markdown dosya (kendi özetlerimiz + kaynak linkleri)
+- [x] `data/docs/` altına 7 markdown dosya (kendi özetlerimiz + kaynak linkleri)
 
 ## Faz 2 — Çekirdek pipeline
 
-- [ ] `config.py` — model aliasları, top_k, eşik, yollar (env ile ezilebilir)
-- [ ] `backends.py` — `FoundryBackend` + `StubBackend`
-- [ ] `chunking.py` — markdown başlık-duyarlı bölme, örtüşmeli
-- [ ] `store.py` — SQLite şema, embedding float32 BLOB, içerik hash'i ile idempotent
-- [ ] `ingest.py` — docs → chunk → batch embed → SQLite
-- [ ] `retrieve.py` — numpy cosine top-k
-- [ ] Birim testler (model gerekmeden yeşil)
+- [x] `config.py` — model aliasları, top_k, eşik, yollar (env ile ezilebilir)
+- [x] `backends.py` — `FoundryBackend` + `StubBackend`
+- [x] `chunking.py` — markdown başlık-duyarlı bölme, örtüşmeli
+- [x] `store.py` — SQLite şema, embedding float32 BLOB, içerik hash'i ile idempotent
+- [x] `ingest.py` — docs → chunk → batch embed → SQLite
+- [x] `retrieve.py` — numpy cosine top-k
+- [x] Birim testler (model gerekmeden yeşil)
 
 ## Faz 3 — RAG + arayüz
 
-- [ ] `rag.py` — system prompt, numaralı bağlam, atıf, düşük skorda reddetme
-- [ ] `cli.py` — REPL, `--show-context`
-- [ ] `ui.py` — Streamlit, streaming cevap, kaynak paneli
+- [x] `rag.py` — system prompt, numaralı bağlam, atıf, düşük skorda reddetme
+- [x] `cli.py` — REPL, `--show-context`
+- [x] `ui.py` — Streamlit, streaming cevap, kaynak paneli
 
 ## Faz 4 — Değerlendirme
 
-- [ ] `tests/eval/questions.yaml` — ~15 soru (cevaplanabilir + cevaplanamaz)
-- [ ] Aday chat modellerini karşılaştır (kalite / hız) → ürün modelini seç
-- [ ] hit@3, reddetme doğruluğu, latency ölç → `top_k`, chunk boyutu, `MIN_SCORE` ayarla
-- [ ] `docs/EVALUATION.md` — gerçek sayılarla
+- [x] `tests/eval/questions.yaml` — 22 soru (17 cevaplanabilir + 5 cevaplanamaz)
+- [x] Aday chat modellerini karşılaştır (kalite / hız) → ürün modelini seç
+- [x] hit@3, reddetme doğruluğu, latency ölç → `top_k`, chunk boyutu, `MIN_SCORE` ayarla
+- [x] `docs/EVALUATION.md` — gerçek sayılarla
 
 ## Faz 5 — Dökümantasyon
 
-- [ ] `README.md` (EN) — kurulum, çalıştırma, mimari, ekran görüntüsü, sınırlamalar
-- [ ] `docs/ARCHITECTURE.md` (EN, mermaid diyagram)
-- [ ] `docs/LEARNING_NOTES.md` (TR)
-- [ ] `docs/VIDEO_SCRIPT.md` (TR, 3 dk, sahne sahne)
+- [x] `README.md` (EN) — kurulum, çalıştırma, mimari, ekran görüntüsü, sınırlamalar
+- [x] Mimari dökümanı — `data/docs/07-project-architecture.md` (bilgi tabanının parçası, asistan kendini anlatabiliyor)
+- [x] `docs/LEARNING_NOTES.md` (TR)
+- [x] `docs/VIDEO_SCRIPT.md` (TR, 3 dk, sahne sahne)
 
 ## Faz 6 — Teslim
 
-- [ ] Wi-Fi kapalıyken offline doğrulama
-- [ ] Çapraz model kod incelemesi
-- [ ] Türkçe commitler, `main`'e push
+- [~] Offline doğrulama — `lsof` ile ölçüldü (üretim sırasında bağlantı yok, katalog çözümünde var). Wi-Fi kapalı testi Ali'de
+- [x] Çapraz model kod incelemesi
+- [x] Türkçe commitler, `main`'e push
 - [ ] Video çekimi (Ali) → link README'ye

@@ -86,6 +86,23 @@ def _merge_short(sections: list[tuple[str, str]], min_chars: int) -> list[tuple[
     return merged
 
 
+def _overlap_tail(piece: str, overlap: int) -> str:
+    """The trailing text carried into the next chunk.
+
+    Cut at a sentence boundary when there is one, otherwise at a word boundary.
+    Slicing by character count alone starts the next chunk mid-word, which looks
+    broken when the passage is shown to the user as a citation.
+    """
+    if not overlap:
+        return ""
+    tail = piece[-overlap:]
+    sentence = max(tail.find(". "), tail.find("! "), tail.find("? "))
+    if sentence != -1:
+        return tail[sentence + 2 :]
+    space = tail.find(" ")
+    return tail[space + 1 :] if space != -1 else tail
+
+
 def _split_long(body: str, target: int, overlap: int) -> list[str]:
     """Split an oversized section on paragraph boundaries, with a small overlap."""
     if len(body) <= target:
@@ -99,7 +116,7 @@ def _split_long(body: str, target: int, overlap: int) -> list[str]:
     for paragraph in paragraphs:
         if current and length + len(paragraph) > target:
             pieces.append("\n\n".join(current))
-            tail = pieces[-1][-overlap:] if overlap else ""
+            tail = _overlap_tail(pieces[-1], overlap)
             current = [tail, paragraph] if tail else [paragraph]
             length = len(tail) + len(paragraph)
         else:

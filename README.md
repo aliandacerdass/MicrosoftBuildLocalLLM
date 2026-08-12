@@ -1,9 +1,11 @@
 # Local RAG Assistant with Microsoft Foundry Local
 
-A document Q&A assistant that runs **entirely on your own machine**. It answers questions
-about a local collection of documents by retrieving the relevant passages and having an
-on-device language model write an answer grounded in them — no cloud account, no API key,
-and no network calls once the models are downloaded.
+A document Q&A assistant that runs **on your own machine**. It answers questions about a
+local collection of documents by retrieving the relevant passages and having an on-device
+language model write an answer grounded in them — no cloud account and no API key. The
+embedding, the search and the answer generation all happen locally; see
+[what "offline" actually means](#what-offline-actually-means-here) for exactly which parts
+of the SDK still touch the network and when.
 
 Built for the Microsoft Summer Internship Program 2026 project on Foundry Local.
 
@@ -16,15 +18,16 @@ Built for the Microsoft Summer Internship Program 2026 project on Foundry Local.
 ```
 > What is an execution provider?
 
-An execution provider is the backend that actually runs the model's math — CPU, a
-specific GPU stack, or an NPU. The SDK can discover which ones your machine
+An execution provider (EP) is the backend that actually runs the model's math — CPU,
+a specific GPU stack, or an NPU. The SDK can discover which EPs your machine
 supports and download the ones that are missing [1].
 
 Sources:
-  [1] 01-foundry-local.md > Execution providers  (similarity 0.743)
-  [2] 01-foundry-local.md > Model lifecycle      (similarity 0.681)
+  [1] 01-foundry-local.md > Execution providers  (similarity 0.651)
+  [2] 01-foundry-local.md > The model catalog    (similarity 0.557)
+  [3] 06-prompt-engineering-for-qa.md > Testing prompts  (similarity 0.479)
 
-(27 ms retrieval, 4180 ms generation)
+(79 ms retrieval, 3612 ms generation)
 ```
 
 Ask something the documents do not cover and it refuses instead of guessing:
@@ -34,6 +37,8 @@ Ask something the documents do not cover and it refuses instead of guessing:
 
 I don't have that information in my knowledge base.
 ```
+
+![The Streamlit interface answering a question, with sources and timings](docs/screenshot.png)
 
 ## Architecture
 
@@ -154,18 +159,40 @@ scope) — see [docs/EVALUATION.md](docs/EVALUATION.md) for the method and the f
 | Retrieval hit rate (correct document in top 3) | 100% |
 | Out-of-scope questions refused | 100% |
 | Answerable questions wrongly refused | 0% |
+| Answerable questions answered correctly | 100% |
 | Median retrieval time | 27 ms |
 
 ## Testing
 
 ```bash
-pytest                 # 35 unit tests, no model download needed
+pytest                 # 38 unit tests, no model download needed
 pytest -m slow -v      # end-to-end tests against the real models
 ```
 
 The unit tests run against a deterministic stub backend, so they are fast and CI-friendly.
 They prove the pipeline is wired correctly — **not** that the product answers well; that is
 what the `slow` tests and the evaluation set are for.
+
+## What "offline" actually means here
+
+Measured on this machine with `lsof`, watching the process's sockets at each step:
+
+| Step | External connections opened |
+|---|---|
+| SDK initialisation | none |
+| `download_and_register_eps()` | none |
+| Resolving a model in the catalog | **2** (HTTPS, Microsoft endpoints) |
+| Loading the model | **1** |
+| Generating an answer | **none** |
+| Embedding and vector search | **none** |
+
+So the parts this project is built on — embeddings, retrieval, and answer generation — run
+entirely on the device, and no connection is opened while an answer is being produced. What
+does reach out is the SDK's own catalog lookup, which happens once when a model is resolved.
+
+Whether that lookup degrades gracefully with no network at all has **not** been verified
+here. To check it on your own machine, build the index first, then turn Wi-Fi off and run
+`python -m localrag.cli "What is cosine similarity?"`.
 
 ## Limitations
 

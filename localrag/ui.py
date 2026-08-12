@@ -18,7 +18,9 @@ def get_assistant() -> Assistant:
 def main() -> None:
     st.set_page_config(page_title="Local RAG Assistant", page_icon="📚", layout="centered")
     st.title("📚 Local RAG Assistant")
-    st.caption("Runs entirely on this device with Microsoft Foundry Local - no internet needed.")
+    st.caption(
+        "Retrieval and answer generation run on this device with Microsoft Foundry Local."
+    )
 
     try:
         assistant = get_assistant()

@@ -38,7 +38,7 @@ wrong you can tell whether retrieval or generation failed, instead of guessing.
 
 ## Design decisions and why
 
-**SQLite plus numpy instead of a vector database.** The index is 46 passages. Loading all
+**SQLite plus numpy instead of a vector database.** The index is 54 passages. Loading all
 the vectors into memory and scoring them with one matrix product takes about 27
 milliseconds. A dedicated vector store would add a dependency and buy nothing at this
 scale.
@@ -66,20 +66,25 @@ clean separation:
 
 - Questions that *are* answerable from the knowledge base scored **0.624 and above**
   (median 0.696).
-- Questions deliberately outside it scored **0.580 and below**.
+- Questions deliberately outside it scored **0.552 and below**.
 
 So the threshold sits between them, at **0.60**. The gap is not large, and the closest
 out-of-scope question — asking how to deploy this assistant to Azure Kubernetes Service —
-scored 0.580 precisely because it is topically adjacent. Retrieval alone cannot separate
+scored 0.552 precisely because it is topically adjacent. Retrieval alone cannot separate
 "about the same subject" from "answerable"; the system prompt is the second line of
 defence there.
 
 ## What runs where
 
-Everything: the embedding model, the vector search, the SQLite file and the chat model all
-live on the local device. The only step that needs a network is the initial model download,
-which is setup rather than runtime. Turning off Wi-Fi and asking another question is the
-simplest proof, and it is the one worth showing.
+The embedding model, the vector search, the SQLite file and the chat model all live on the
+local device. Watching the process's sockets with `lsof` during a question shows where the
+network is actually touched: two HTTPS connections open when the SDK resolves a model in its
+catalog and one more when the model is loaded, and **no connection opens while the answer is
+being generated**. Embedding and retrieval open none at all.
+
+So inference is genuinely local; what reaches out is the SDK's catalog lookup at startup,
+plus the one-time model download. Whether that lookup degrades gracefully with no network at
+all is not yet verified — turning Wi-Fi off and asking a question is the test.
 
 ## Measured performance
 
@@ -87,8 +92,8 @@ On an Apple M4 (CPU inference, no GPU execution provider registered):
 
 | Step | Time |
 |---|---|
-| Retrieval (embed the query plus search 46 passages) | ~27 ms |
-| Answer generation | a few seconds, depending on model size |
+| Retrieval (embed the query plus search 54 passages) | 27-80 ms |
+| Answer generation | median 3-4 s with qwen2.5-1.5b, 16 s with phi-3.5-mini |
 | Loading a cached model | 1.6-3.3 s |
 | Downloading a model (one-time) | 5-9 minutes each |
 

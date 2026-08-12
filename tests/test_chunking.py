@@ -55,6 +55,16 @@ def test_long_section_is_split_with_overlap():
     assert first_body[-20:] in chunks[1].text
 
 
+def test_overlap_starts_at_a_word_boundary():
+    # Citations are shown to the user, so an overlap must not begin mid-word.
+    body = "\n\n".join("alpha bravo charlie delta echo foxtrot golf hotel" for _ in range(8))
+    chunks = chunk_markdown("long.md", f"# T\n\n## S\n\n{body}", target_chars=200, overlap_chars=30)
+    assert len(chunks) > 1
+    for chunk in chunks[1:]:
+        carried = chunk.text.split("\n\n", 1)[1].split()[0]
+        assert carried in {"alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel"}
+
+
 def test_ordinals_are_unique_and_sequential():
     chunks = chunk_markdown("doc.md", DOC)
     assert [c.ordinal for c in chunks] == list(range(len(chunks)))

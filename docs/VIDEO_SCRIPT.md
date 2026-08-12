@@ -67,10 +67,20 @@ Model uydurma cevap veriyor. (Smoke testte `qwen2.5-0.5b`'nin "RAG" için ürett
 > söyle' talimatı, ve ondan daha sağlamı — en iyi pasaj bile benzerlik eşiğinin altındaysa
 > modeli hiç çağırmadan reddediyorum. Bu deterministik, modelin görmezden gelmesi mümkün
 > değil. Eşiği tahminle değil ölçerek seçtim: cevaplanabilir sorular 0.62 ve üstü,
-> kapsam dışı sorular 0.58 ve altı skor alıyordu, eşiği aradaki 0.60'a koydum.
+> kapsam dışı sorular 0.55 ve altı skor alıyordu, eşiği aradaki 0.60'a koydum.
 >
-> Ve şimdi Wi-Fi'ı kapatıyorum... aynı soru, aynı cevap. Hiçbir bulut çağrısı yok —
-> model de, embedding de bu makinede çalışıyor."
+> Ve şimdi Wi-Fi'ı kapatıyorum... aynı soru, aynı cevap. Model de, embedding de bu
+> makinede çalışıyor."
+
+**Önemli — bu sahneyi çekmeden önce prova et.** `lsof` ile ölçtüğümüz şu: cevap
+üretilirken hiçbir ağ bağlantısı açılmıyor, ama SDK modeli katalogda çözerken 2, modeli
+yüklerken 1 HTTPS bağlantısı açıyor (detay: README > *What "offline" actually means here*).
+Wi-Fi kapalıyken model çözümlemesi hata verirse iki seçenek var:
+
+- Streamlit'i Wi-Fi **açıkken** başlat (model yüklenir, katalog çözülür), sonra Wi-Fi'ı
+  kapat ve soruyu sor — cevap üretimi zaten ağ kullanmıyor, bu dürüst bir demo.
+- Ya da sahneyi olduğu gibi anlat: "üretim tamamen yerel, SDK açılışta kataloğa bakıyor."
+  Ölçtüğün şeyi söylemek, ölçmediğin şeyi iddia etmekten iyidir.
 
 ---
 
@@ -92,7 +102,9 @@ Model uydurma cevap veriyor. (Smoke testte `qwen2.5-0.5b`'nin "RAG" için ürett
 > şekilde iyileştirdi.
 >
 > Üçüncüsü: **ölçmeden ayar yapılmıyor.** 22 soruluk bir değerlendirme seti hazırladım;
-> doğru pasajı bulma oranı %100, kapsam dışı soruları reddetme oranı %100 çıktı.
+> doğru pasajı bulma oranı %100, cevap doğruluğu 17/17, kapsam dışı soruları
+> reddetme oranı %100 çıktı. Ayrıca iki modeli karşılaştırdım: phi-3.5-mini aynı
+> kalitede ama beş kat yavaştı, o yüzden küçük olanı seçtim.
 > Sayılar olmadan eşik seçmek tahmindi."
 
 ---

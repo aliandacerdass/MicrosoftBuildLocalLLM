@@ -34,8 +34,16 @@ model.get_embedding_client().generate_embeddings([...])  # resp.data[i].embeddin
 model.unload()
 ```
 
-**Tuzak:** `model.is_cached` bir *property*, metot değil. `is_cached()` çağırmak
+**Tuzak 1:** `model.is_cached` bir *property*, metot değil. `is_cached()` çağırmak
 `TypeError: 'bool' object is not callable` verir.
+
+**Tuzak 2 (önemli):** Model cache'i `app_name` başına ayrışıyor. `mslocalrag_smoke` adıyla
+indirilen model, uygulama `microsoft-build-local-llm` adıyla açıldığında yok sayıldı ve
+baştan indi (ölçüldü: 498 sn). Bayt paylaşımı yok. Bu yüzden app adı tek yerde,
+`config.APP_NAME`'de tutuluyor ve her giriş noktası onu kullanıyor.
+
+**Tuzak 3:** Aynı anda iki Foundry Local süreci çalışırsa ikisi de yavaşlıyor. 46 chunk'lık
+ingest, arka planda model indirmesi varken 677 sn sürdü.
 
 ## Kararlar ve gerekçeleri
 

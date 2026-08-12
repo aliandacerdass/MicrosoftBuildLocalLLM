@@ -1,0 +1,83 @@
+# Evaluation set for the local RAG assistant.
+#
+# answerable:   the knowledge base contains the answer. We check that the right
+#               document is retrieved and that the answer mentions the expected
+#               facts.
+# unanswerable: the knowledge base does NOT contain the answer. The assistant is
+#               expected to refuse rather than guess.
+
+answerable:
+  - question: What is an execution provider in Foundry Local?
+    source: 01-foundry-local.md
+    keywords: [cpu, gpu]
+
+  - question: Which Python version does the Foundry Local SDK require?
+    source: 01-foundry-local.md
+    keywords: ["3.11"]
+
+  - question: How do I install the Foundry Local SDK on Windows?
+    source: 01-foundry-local.md
+    keywords: [winml]
+
+  - question: What are the three steps of RAG?
+    source: 02-rag-pattern.md
+    keywords: [retrieve, augment, generate]
+
+  - question: Why is RAG better than fine-tuning for factual questions?
+    source: 02-rag-pattern.md
+    keywords: [fine-tun]
+
+  - question: What are the main failure modes of a RAG system?
+    source: 02-rag-pattern.md
+    keywords: [retriev]
+
+  - question: How many dimensions does the embedding model produce?
+    source: 03-embeddings-and-vector-search.md
+    keywords: ["1024"]
+
+  - question: What is cosine similarity and what range does it have?
+    source: 03-embeddings-and-vector-search.md
+    keywords: [angle]
+
+  - question: Why should I normalise vectors before searching?
+    source: 03-embeddings-and-vector-search.md
+    keywords: [dot product]
+
+  - question: Why store embeddings as float32 bytes instead of JSON?
+    source: 04-sqlite-vector-store.md
+    keywords: [smaller]
+
+  - question: What is the content hash column used for?
+    source: 04-sqlite-vector-store.md
+    keywords: [unchanged]
+
+  - question: How large is a 1024 dimension float32 vector in bytes?
+    source: 04-sqlite-vector-store.md
+    keywords: ["4096"]
+
+  - question: What chunk size does this project target?
+    source: 05-chunking-strategies.md
+    keywords: ["800"]
+
+  - question: Why is overlap used between chunks?
+    source: 05-chunking-strategies.md
+    keywords: [boundar]   # stem: matches "boundary" and "boundaries"
+
+  - question: Why is the heading prepended to the chunk text before embedding?
+    source: 05-chunking-strategies.md
+    keywords: [match]
+
+  - question: What should a grounding system prompt tell the model to do?
+    source: 06-prompt-engineering-for-qa.md
+    keywords: [context]
+
+  - question: Why refuse before calling the model instead of only instructing it?
+    source: 06-prompt-engineering-for-qa.md
+    keywords: [threshold]
+
+unanswerable:
+  - question: What is the capital city of Australia?
+  - question: How do I deploy this assistant to Azure Kubernetes Service?
+  - question: What is my bank account balance?
+  - question: Who won the 2018 FIFA World Cup?
+  - question: What is the price per token of GPT-4 on the OpenAI API?

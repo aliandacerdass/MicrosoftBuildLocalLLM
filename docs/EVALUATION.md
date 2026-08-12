@@ -5,10 +5,12 @@ running `tests/eval/run_eval.py` on this machine; nothing is estimated.
 
 ## Method
 
-The question set is `tests/eval/questions.yaml`: **22 questions**, split into two groups.
+The question set is `tests/eval/questions.yaml`: **25 questions**, split into two groups.
 
-- **17 answerable** questions, each tagged with the document that contains the answer and
-  the keywords a correct answer must mention.
+- **20 answerable** questions, each tagged with the document that contains the answer and
+  the keywords a correct answer must mention. Three of them are phrased the way a real user
+  asked them rather than the way the documents are worded — they were added after a user's
+  question was wrongly refused (see below).
 - **5 out-of-scope** questions the knowledge base genuinely cannot answer (world facts,
   personal data, cloud deployment). The assistant is expected to refuse these.
 
@@ -23,6 +25,13 @@ Three things are measured:
 Keyword matching is a blunt instrument — it can mark a correct answer wrong because it used
 a synonym. Every failure below was read by hand before being counted.
 
+The one current miss is exactly that: asked how the refusal threshold was chosen, the model
+gives a complete and accurate answer — it names 0.624, 0.552, the overfitted 0.60 and the
+final 0.45 — but never uses the word the check looks for. The keyword for that question had
+already been adjusted once, so it was left alone rather than adjusted again: past a certain
+point, editing the check until it passes stops being measurement. The headline number is
+therefore reported as 19/20, with the caveat that reading the answer shows 20/20.
+
 Reproduce with:
 
 ```bash
@@ -34,31 +43,54 @@ python tests/eval/run_eval.py --retrieval-only   # retrieval only, no chat model
 ## Results
 
 Configuration: `qwen2.5-1.5b` chat model, `qwen3-embedding-0.6b` embeddings (1024
-dimensions), `top_k = 3`, `min_score = 0.60`, 56 indexed passages. Apple M4, CPU inference.
+dimensions), `top_k = 3`, `min_score = 0.45`, 56 indexed passages. Apple M4, CPU inference.
 
 | Metric | Result |
 |---|---|
-| Retrieval hit rate | **17/17 (100%)** |
-| Answer accuracy | **17/17 (100%)** |
+| Retrieval hit rate | **20/20 (100%)** |
+| Answer accuracy | **19/20 by keyword, 20/20 by hand** (see below) |
 | Out-of-scope questions refused | **5/5 (100%)** |
-| Answerable questions wrongly refused | **0/17 (0%)** |
+| Answerable questions wrongly refused | **0/20 (0%)** |
 | Median retrieval time | 27 ms isolated, 70 ms with the chat model also resident |
 | Median generation time | 3.3-5.8 s (varies noticeably between runs) |
 
 ## Choosing the refusal threshold
 
-The threshold was set from data, not intuition. Running the set with the threshold disabled
-produced a clean separation between the two groups:
+The first attempt set the threshold from the measured gap between the two groups. With the
+original 17 questions, answerable ones scored 0.624 and above while out-of-scope ones stayed
+at 0.552 and below, so `MIN_SCORE = 0.60` sat neatly between them.
 
-| Group | Top similarity score |
-|---|---|
-| Answerable questions | min **0.624**, median **0.696** |
-| Out-of-scope questions | max **0.552** |
+**That was overfitted, and a real user broke it immediately.** Asked *"How was the refusal
+threshold chosen?"* the assistant refused — even though it had retrieved exactly the right
+passage, `07-project-architecture.md > How the threshold was chosen`, as the top hit. The
+question simply scored 0.514, because it was phrased naturally instead of in the documents'
+own words:
 
-So any threshold between 0.552 and 0.624 separates them perfectly; `MIN_SCORE = 0.60` sits
-in that gap.
+| Question (naturally phrased) | Top score | Correct passage retrieved? |
+|---|---|---|
+| How was the refusal threshold chosen? | 0.514 | yes, rank 1 |
+| What runs on the device and what needs the network? | 0.512 | yes, rank 1 |
+| What is the refusal threshold and why 0.60? | 0.517 | yes, rank 1 |
+| Which parts run on the device and which need a network? | 0.539 | yes, rank 1 |
 
-The individual out-of-scope scores show why the margin is thin:
+These land in the same band as the out-of-scope questions, so no threshold can separate
+"badly phrased but answerable" from "off topic" on similarity alone.
+
+The threshold was therefore lowered to **0.45** and the result measured rather than assumed:
+
+| `min_score` | Out-of-scope refused | Answerable wrongly refused |
+|---|---|---|
+| 0.60 | 5/5 (all by the threshold) | real user questions, silently |
+| 0.50 | 5/5 (3 by threshold, 2 by the model) | 0/20 |
+| **0.45** | **5/5** (3 by threshold, 2 by the model) | **0/20** |
+
+At 0.45 the protection is unchanged — the two out-of-scope questions that now reach the
+model (`0.552` and `0.508`) are refused by the model itself, which is exactly the job the
+system prompt was written for. So the loose threshold is strictly better: same refusals,
+fewer false ones. It also turns "the system prompt is the second line of defence" from a
+claim into something that has actually been exercised.
+
+The individual out-of-scope scores show how narrow the band is:
 
 | Question | Top score |
 |---|---|
@@ -70,17 +102,19 @@ The individual out-of-scope scores show why the margin is thin:
 
 The last one scores high because it *is* about this project — just about something the
 documents never cover. Similarity measures topic, not answerability, so the threshold alone
-cannot separate "related" from "answerable". The system prompt is the second line of
-defence, and in this run it held: the model refused rather than inventing a deployment
-procedure.
+can never separate "related" from "answerable". With `min_score = 0.45` this question and
+the GPT-4 pricing one reach the model, and the model refuses both.
 
 ## What changed during tuning
 
 Three iterations, each driven by a measurement rather than a hunch.
 
-**1. The threshold was far too permissive.** The initial `MIN_SCORE = 0.35` was a guess made
-before any data existed. It would have let every out-of-scope question through to the model.
-Measured separation moved it to 0.60.
+**1. The threshold started as a guess, was over-tightened, then corrected.** The initial
+`MIN_SCORE = 0.35` was picked before any data existed. Measured separation moved it to 0.60,
+which turned out to be overfitted to questions written in the documents' own vocabulary; a
+real user's phrasing was refused despite perfect retrieval. It now sits at 0.45, with the
+model handling the ambiguous band. The lesson is not "measure once" but "measure on inputs
+you did not write".
 
 **2. Two keyword checks were wrong, not two answers.** An early run scored 14/17. Reading
 the answers showed two were correct but phrased differently: the expected keyword
@@ -94,7 +128,11 @@ float32-versus-JSON question with an invented figure ("around 4000 bytes for JSO
 smaller" fact was retrievable and the answer became correct. A reminder that in RAG, the
 first thing to check after a bad answer is what was retrieved.
 
-**4. A cross-model review found three real bugs.** The diff was reviewed by a different
+**4. Answers were being cut off.** `MAX_TOKENS` was 400, which truncated a verbose answer
+mid-sentence — it reads as a crash rather than an answer. Raised to 600; most answers are far
+shorter, so only the long ones cost more time.
+
+**5. A cross-model review found three real bugs.** The diff was reviewed by a different
 model family (Gemini, via the Antigravity CLI) and every finding was checked against the
 code. Three held: a document with no subheadings had its title duplicated inside the chunk;
 the chunk-size accounting ignored the two-character paragraph separators and could overshoot
@@ -106,11 +144,13 @@ them with identical results.
 
 ## Honest limits of these numbers
 
-- **22 questions is a small set.** It is enough to catch systematic failures, not enough to
+- **25 questions is a small set.** It is enough to catch systematic failures, not enough to
   claim a precise accuracy percentage.
-- **The questions were written by the person who wrote the documents.** They are phrased
-  the way the source material is phrased, which flatters retrieval. Real users phrase
-  things worse.
+- **Most questions were written by the person who wrote the documents.** They are phrased
+  the way the source material is phrased, which flatters retrieval. Three questions from a
+  real user were added after this bit us, and they scored 0.11 to 0.18 lower than the
+  in-house phrasings of the same facts. Three is not enough; a bigger set of outside
+  phrasings would probably find more.
 - **Keyword matching is not comprehension.** An answer can contain every keyword and still
   be poorly reasoned.
 - **100% is a ceiling artefact.** It means this set no longer discriminates between good and

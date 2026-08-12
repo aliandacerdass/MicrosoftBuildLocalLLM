@@ -33,13 +33,17 @@ CHUNK_MIN_CHARS = int(os.getenv("LOCALRAG_CHUNK_MIN", "200"))
 # --- Retrieval --------------------------------------------------------------
 TOP_K = int(os.getenv("LOCALRAG_TOP_K", "3"))
 # If the best chunk scores below this, we refuse without calling the model at
-# all. Measured on the evaluation set: answerable questions score 0.624 and
-# above, out-of-scope ones 0.580 and below, so the threshold sits between them.
-# See docs/EVALUATION.md.
-MIN_SCORE = float(os.getenv("LOCALRAG_MIN_SCORE", "0.60"))
+# all. Deliberately loose: a naturally phrased question can retrieve exactly the
+# right passage and still score around 0.51, so a tight threshold refuses real
+# questions. Measured at 0.45 the out-of-scope questions are still refused 5/5 -
+# the ones that get past the threshold are refused by the model itself, which is
+# what the system prompt is for. See docs/EVALUATION.md.
+MIN_SCORE = float(os.getenv("LOCALRAG_MIN_SCORE", "0.45"))
 
 # --- Generation -------------------------------------------------------------
-MAX_TOKENS = int(os.getenv("LOCALRAG_MAX_TOKENS", "400"))
+# 400 was low enough to cut a verbose answer off mid-sentence, which reads as a
+# bug. Most answers are far shorter, so raising it costs time only on the long ones.
+MAX_TOKENS = int(os.getenv("LOCALRAG_MAX_TOKENS", "600"))
 TEMPERATURE = float(os.getenv("LOCALRAG_TEMPERATURE", "0.2"))
 
 REFUSAL_MESSAGE = (

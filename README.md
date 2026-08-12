@@ -68,7 +68,9 @@ Two defences against a confident wrong answer:
    say it does not know otherwise.
 2. **A similarity threshold** refuses before the model is called at all when even the best
    passage is a poor match. This one is deterministic — the model cannot talk its way past
-   it.
+   it. It is deliberately set low (0.45), because similarity measures topic rather than
+   answerability: a naturally phrased question can retrieve the right passage and still
+   score 0.51. The threshold is a floor, not the main filter.
 
 ## Requirements
 
@@ -142,7 +144,7 @@ variable:
 | `LOCALRAG_CHAT_MODEL` | `qwen2.5-1.5b` | Foundry Local alias of the answering model |
 | `LOCALRAG_EMBED_MODEL` | `qwen3-embedding-0.6b` | Embedding model (1024 dimensions) |
 | `LOCALRAG_TOP_K` | `3` | Passages retrieved per question |
-| `LOCALRAG_MIN_SCORE` | `0.60` | Below this similarity the assistant refuses |
+| `LOCALRAG_MIN_SCORE` | `0.45` | Below this similarity the assistant refuses without calling the model |
 | `LOCALRAG_CHUNK_CHARS` | `800` | Target chunk size |
 | `LOCALRAG_DB` | `data/index/chunks.db` | Index location |
 
@@ -151,16 +153,20 @@ differs by platform.
 
 ## Evaluation
 
-Measured on a 22-question set (17 answerable from the knowledge base, 5 deliberately out of
+Measured on a 25-question set (20 answerable from the knowledge base, 5 deliberately out of
 scope) — see [docs/EVALUATION.md](docs/EVALUATION.md) for the method and the full numbers.
 
 | Metric | Result |
 |---|---|
-| Retrieval hit rate (correct document in top 3) | 100% |
-| Out-of-scope questions refused | 100% |
-| Answerable questions wrongly refused | 0% |
-| Answerable questions answered correctly | 100% |
+| Retrieval hit rate (correct document in top 3) | 20/20 |
+| Answerable questions answered correctly | 19/20 by keyword match, 20/20 read by hand |
+| Out-of-scope questions refused | 5/5 |
+| Answerable questions wrongly refused | 0/20 |
 | Median retrieval time | 27 ms |
+
+The threshold that decides refusals was tightened too far at first and refused a real user's
+question despite retrieving the right passage; `docs/EVALUATION.md` documents what that cost
+and how it was corrected.
 
 ## Testing
 

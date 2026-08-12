@@ -75,6 +75,21 @@ answerable:
     source: 06-prompt-engineering-for-qa.md
     keywords: [threshold]
 
+  # Phrased the way a real user asked them, not the way the documents are
+  # worded. These score noticeably lower than the questions above and are the
+  # reason the refusal threshold is deliberately loose.
+  - question: How was the refusal threshold chosen?
+    source: 07-project-architecture.md
+    keywords: [separat]   # a correct answer explains what the threshold separates
+
+  - question: What runs on the device and what needs the network?
+    source: 07-project-architecture.md
+    keywords: [embedding, download]   # device side and network side
+
+  - question: Why does this project use SQLite instead of a vector database?
+    source: 04-sqlite-vector-store.md
+    keywords: [numpy]
+
 unanswerable:
   - question: What is the capital city of Australia?
   - question: How do I deploy this assistant to Azure Kubernetes Service?

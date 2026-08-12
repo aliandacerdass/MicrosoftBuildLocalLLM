@@ -11,7 +11,7 @@ A question travels through five stages:
 
 1. **Embed the question** with `qwen3-embedding-0.6b`, producing a 1024-dimension vector.
 2. **Search** the SQLite index by cosine similarity and take the top 3 passages.
-3. **Check the threshold.** If the best passage scores below 0.60, refuse immediately —
+3. **Check the threshold.** If the best passage scores below 0.45, refuse immediately —
    the language model is never called.
 4. **Build the prompt**: a system message with the grounding rules, then the numbered
    passages followed by the question.
@@ -61,18 +61,23 @@ similarity threshold is arithmetic it cannot argue with, and it costs no generat
 
 ## How the threshold was chosen
 
-Not by guessing. Running the 22-question evaluation set with the threshold disabled gave a
-clean separation:
+By measuring, then by being corrected.
 
-- Questions that *are* answerable from the knowledge base scored **0.624 and above**
-  (median 0.696).
-- Questions deliberately outside it scored **0.552 and below**.
+The first version used the gap in the evaluation set: answerable questions scored 0.624 and
+above, out-of-scope ones 0.552 and below, so the threshold went between them at 0.60. That
+was overfitted. Questions written in the documents' own vocabulary score high; the same
+question asked naturally scores much lower. "How was the refusal threshold chosen?" retrieves
+exactly the right passage as its top hit and still only scores 0.514 — so a 0.60 threshold
+refused a question the knowledge base answers perfectly well.
 
-So the threshold sits between them, at **0.60**. The gap is not large, and the closest
-out-of-scope question — asking how to deploy this assistant to Azure Kubernetes Service —
-scored 0.552 precisely because it is topically adjacent. Retrieval alone cannot separate
-"about the same subject" from "answerable"; the system prompt is the second line of
-defence there.
+The threshold is now **0.45**, and the consequence was measured rather than assumed: the
+out-of-scope questions are still refused 5 out of 5. Three of them are refused by the
+threshold, and the two that get past it — the Azure Kubernetes deployment question at 0.552
+and the GPT-4 pricing one at 0.508 — are refused by the model itself.
+
+That is the division of labour: the threshold is a cheap deterministic floor, and the system
+prompt handles the ambiguous band above it. Similarity measures topic, not answerability, so
+no threshold can separate "related but not covered" from "answerable" on its own.
 
 ## What runs where
 

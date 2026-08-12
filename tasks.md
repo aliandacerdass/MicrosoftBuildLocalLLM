@@ -44,7 +44,7 @@ Durum: `[ ]` yapılacak · `[~]` devam ediyor · `[x]` bitti
 
 ## Faz 6 — Teslim
 
-- [~] Offline doğrulama — `lsof` ile ölçüldü (üretim sırasında bağlantı yok, katalog çözümünde var). Wi-Fi kapalı testi Ali'de
+- [x] Offline doğrulama — Wi-Fi kapalıyken soğuk süreç 10.1 sn'de cevapladı (`tests/offline_check.py`)
 - [x] Çapraz model kod incelemesi
 - [x] Türkçe commitler, `main`'e push
 - [ ] Video çekimi (Ali) → link README'ye

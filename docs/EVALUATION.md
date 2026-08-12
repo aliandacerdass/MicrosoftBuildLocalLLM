@@ -34,7 +34,7 @@ python tests/eval/run_eval.py --retrieval-only   # retrieval only, no chat model
 ## Results
 
 Configuration: `qwen2.5-1.5b` chat model, `qwen3-embedding-0.6b` embeddings (1024
-dimensions), `top_k = 3`, `min_score = 0.60`, 55 indexed passages. Apple M4, CPU inference.
+dimensions), `top_k = 3`, `min_score = 0.60`, 56 indexed passages. Apple M4, CPU inference.
 
 | Metric | Result |
 |---|---|

@@ -29,3 +29,4 @@ models/
 # Scratch
 scratch/
 *.log
+tests/offline_check.log

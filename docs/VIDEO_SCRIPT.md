@@ -72,15 +72,12 @@ Model uydurma cevap veriyor. (Smoke testte `qwen2.5-0.5b`'nin "RAG" için ürett
 > Ve şimdi Wi-Fi'ı kapatıyorum... aynı soru, aynı cevap. Model de, embedding de bu
 > makinede çalışıyor."
 
-**Önemli — bu sahneyi çekmeden önce prova et.** `lsof` ile ölçtüğümüz şu: cevap
-üretilirken hiçbir ağ bağlantısı açılmıyor, ama SDK modeli katalogda çözerken 2, modeli
-yüklerken 1 HTTPS bağlantısı açıyor (detay: README > *What "offline" actually means here*).
-Wi-Fi kapalıyken model çözümlemesi hata verirse iki seçenek var:
+**Bu sahne test edildi, güvenle çekebilirsin.** Wi-Fi kapalıyken sıfırdan başlatılan süreç
+10.1 saniyede cevap verdi (`tests/offline_check.py`, log dosyada duruyor). İstersen o logu
+da ekranda gösterebilirsin — iddia değil, kanıt.
 
-- Streamlit'i Wi-Fi **açıkken** başlat (model yüklenir, katalog çözülür), sonra Wi-Fi'ı
-  kapat ve soruyu sor — cevap üretimi zaten ağ kullanmıyor, bu dürüst bir demo.
-- Ya da sahneyi olduğu gibi anlat: "üretim tamamen yerel, SDK açılışta kataloğa bakıyor."
-  Ölçtüğün şeyi söylemek, ölçmediğin şeyi iddia etmekten iyidir.
+Ek detay istersen: `lsof` ölçümünde cevap üretilirken hiçbir bağlantı açılmıyor; SDK sadece
+modeli katalogda çözerken ve yüklerken bağlantı açıyor, ağ yokken de sorunsuz devam ediyor.
 
 ---
 

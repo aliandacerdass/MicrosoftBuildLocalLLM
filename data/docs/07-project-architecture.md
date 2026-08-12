@@ -38,7 +38,7 @@ wrong you can tell whether retrieval or generation failed, instead of guessing.
 
 ## Design decisions and why
 
-**SQLite plus numpy instead of a vector database.** The index is 55 passages. Loading all
+**SQLite plus numpy instead of a vector database.** The index is 56 passages. Loading all
 the vectors into memory and scoring them with one matrix product takes about 27
 milliseconds. A dedicated vector store would add a dependency and buy nothing at this
 scale.
@@ -83,8 +83,13 @@ catalog and one more when the model is loaded, and **no connection opens while t
 being generated**. Embedding and retrieval open none at all.
 
 So inference is genuinely local; what reaches out is the SDK's catalog lookup at startup,
-plus the one-time model download. Whether that lookup degrades gracefully with no network at
-all is not yet verified — turning Wi-Fi off and asking a question is the test.
+plus the one-time model download.
+
+That lookup was then tested with the network actually off. A cold process started while
+Wi-Fi was down answered a question in 10.1 seconds — 1.2 seconds of retrieval and 8.2
+seconds of generation — with no error, so the catalog lookup falls back to local state
+rather than failing. Once the models are cached, the assistant works with no network at
+all.
 
 ## Measured performance
 
@@ -92,7 +97,7 @@ On an Apple M4 (CPU inference, no GPU execution provider registered):
 
 | Step | Time |
 |---|---|
-| Retrieval (embed the query plus search 55 passages) | 27-100 ms |
+| Retrieval (embed the query plus search 56 passages) | 27-100 ms |
 | Answer generation | median 3-6 s with qwen2.5-1.5b, 16 s with phi-3.5-mini |
 | Loading a cached model | 1.6-3.3 s |
 | Downloading a model (one-time) | 5-9 minutes each |

@@ -80,7 +80,7 @@ ingest, arka planda model indirmesi varken 677 sn sürdü.
 - [x] Değerlendirme ve ayar → `docs/EVALUATION.md`
 - [x] Dökümantasyon + video scripti
 - [x] Çapraz model incelemesi (Gemini) → 3 gerçek hata bulundu ve düzeltildi
-- [ ] **Wi-Fi kapalı offline testi (Ali Wi-Fi'ı kapatınca yapılacak)**
+- [x] Wi-Fi kapalı offline testi — GEÇTİ: soğuk süreç 10.1 sn'de cevapladı, katalog çözümü ağsız da çalışıyor
 - [ ] Video çekimi (Ali) → linki README'ye
 
 Güncel görev listesi: `tasks.md`

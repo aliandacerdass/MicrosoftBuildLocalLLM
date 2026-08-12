@@ -190,13 +190,26 @@ So the parts this project is built on — embeddings, retrieval, and answer gene
 entirely on the device, and no connection is opened while an answer is being produced. What
 does reach out is the SDK's own catalog lookup, which happens once when a model is resolved.
 
-Whether that lookup degrades gracefully with no network at all has **not** been verified
-here. To check it on your own machine, build the index first, then turn Wi-Fi off and run
-`python -m localrag.cli "What is cosine similarity?"`.
+**Verified with the network actually off.** `tests/offline_check.py` waits for the network
+to disappear, then starts a cold process and asks a question. With Wi-Fi off the assistant
+answered in 10.1 seconds — model load, retrieval and generation included — and the catalog
+lookup degraded gracefully rather than failing:
+
+```
+[14:46:40] network is down. Waiting 5s to be sure, then asking a cold question.
+[14:46:55] process finished in 10.1s with exit code 0
+           (1218 ms retrieval, 8165 ms generation)
+[14:46:55] still offline at the end: True
+           RESULT: WORKS OFFLINE
+```
+
+Reproduce it yourself: build the index, run `python tests/offline_check.py`, turn Wi-Fi off
+for two minutes, then read `tests/offline_check.log`.
 
 ## Limitations
 
-- **Offline applies to inference, not setup.** The first run downloads model weights.
+- **Offline applies to inference, not setup.** The first run downloads model weights; after
+  that the assistant was verified to work with the network off.
 - Answer quality is bounded by a small local model. Retrieval grounds it, but it will not
   match a frontier cloud model on reasoning.
 - Brute-force search is fine into the tens of thousands of chunks; past that you would want

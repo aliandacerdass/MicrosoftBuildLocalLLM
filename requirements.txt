@@ -1,0 +1,11 @@
+# Runtime
+foundry-local-sdk==1.2.4   # on-device model runtime + catalog (cross-platform build)
+numpy==2.5.2               # cosine similarity over the embedding matrix
+streamlit==1.61.1          # web UI
+
+# Development
+pytest==9.1.1
+PyYAML==6.0.3              # evaluation question set
+
+# Note: on Windows you may install `foundry-local-sdk-winml` instead, which
+# exposes the same API but binds to the Windows ML runtime.

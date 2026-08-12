@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtual environment
+.venv/
+venv/
+
+# Local data — never commit generated DB or downloaded models
+*.db
+*.sqlite
+*.sqlite3
+data/index/
+models/
+
+# Secrets (this project needs none, but never risk it)
+.env
+.env.*
+*.key
+*.pem
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+
+# Scratch
+scratch/
+*.log

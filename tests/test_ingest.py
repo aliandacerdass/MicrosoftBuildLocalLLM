@@ -83,6 +83,40 @@ def test_edited_document_adds_its_new_chunks(docs, tmp_path):
     assert second["chunks"] == first["chunks"] + 1
 
 
+def test_edited_document_drops_its_old_chunks(docs, tmp_path):
+    db = tmp_path / "index.db"
+    ingest(StubBackend(), docs_dir=docs, db_path=db, verbose=False)
+
+    (docs / "b.md").write_text(
+        DOC_B.replace("Beta has a single section", "Beta was completely rewritten"),
+        encoding="utf-8",
+    )
+    second = ingest(StubBackend(), docs_dir=docs, db_path=db, verbose=False)
+
+    assert second["removed"] == 1
+    connection = store.connect(db)
+    try:
+        rows = connection.execute("SELECT text FROM chunks WHERE source = 'b.md'").fetchall()
+    finally:
+        connection.close()
+    assert len(rows) == 1
+    assert "completely rewritten" in rows[0][0]
+
+
+def test_deleted_document_is_removed_from_the_index(docs, tmp_path):
+    db = tmp_path / "index.db"
+    ingest(StubBackend(), docs_dir=docs, db_path=db, verbose=False)
+
+    (docs / "b.md").unlink()
+    ingest(StubBackend(), docs_dir=docs, db_path=db, verbose=False)
+
+    connection = store.connect(db)
+    try:
+        assert "b.md" not in store.stats(connection)
+    finally:
+        connection.close()
+
+
 def test_rebuild_starts_from_an_empty_index(docs, tmp_path):
     db = tmp_path / "index.db"
     ingest(StubBackend(), docs_dir=docs, db_path=db, verbose=False)

@@ -12,7 +12,7 @@ APP_NAME = os.getenv("LOCALRAG_APP_NAME", "microsoft-build-local-llm")
 
 # Aliases come from the Foundry Local catalog. Run `python -m localrag.models`
 # to see what is available on your machine before changing these.
-CHAT_MODEL = os.getenv("LOCALRAG_CHAT_MODEL", "phi-3.5-mini")
+CHAT_MODEL = os.getenv("LOCALRAG_CHAT_MODEL", "qwen2.5-1.5b")
 EMBED_MODEL = os.getenv("LOCALRAG_EMBED_MODEL", "qwen3-embedding-0.6b")
 
 # --- Paths ------------------------------------------------------------------

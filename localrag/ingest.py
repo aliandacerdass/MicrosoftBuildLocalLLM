@@ -45,11 +45,19 @@ def ingest(
     connection = store.connect(db_path)
 
     try:
+        current: dict[str, set[str]] = {}
+        for chunk in chunks:
+            current.setdefault(chunk.source, set()).add(store.content_hash(chunk.source, chunk.text))
+
+        # Passages that were edited away or whose file was deleted must go, or the
+        # assistant keeps answering from text that is no longer on disk.
+        removed = store.delete_stale(connection, current)
+
         known = store.existing_hashes(connection)
         pending = [c for c in chunks if store.content_hash(c.source, c.text) not in known]
 
         if verbose:
-            print(f"{len(chunks)} chunks in {docs_dir}, {len(pending)} new")
+            print(f"{len(chunks)} chunks in {docs_dir}, {len(pending)} new, {removed} removed")
 
         inserted = 0
         started = time.time()
@@ -70,7 +78,12 @@ def ingest(
                 print(f"  {source:<44} {count:>3} chunks")
             print(f"Index: {db_path} ({sum(totals.values())} chunks total)")
 
-        return {"chunks": len(chunks), "new": len(pending), "inserted": inserted}
+        return {
+            "chunks": len(chunks),
+            "new": len(pending),
+            "inserted": inserted,
+            "removed": removed,
+        }
     finally:
         connection.close()
 

@@ -106,6 +106,24 @@ def delete_source(connection: sqlite3.Connection, source: str) -> int:
     return cursor.rowcount
 
 
+def delete_stale(connection: sqlite3.Connection, current: dict[str, set[str]]) -> int:
+    """Drop chunks that no longer exist in the documents.
+
+    ``current`` maps each source file to the hashes it currently produces. Without
+    this, editing a document would leave its old passages in the index and the
+    assistant would keep answering from text that is no longer on disk.
+    """
+    stale: list[str] = []
+    for source, hash_ in connection.execute("SELECT source, content_hash FROM chunks"):
+        if source not in current or hash_ not in current[source]:
+            stale.append(hash_)
+
+    if stale:
+        connection.executemany("DELETE FROM chunks WHERE content_hash = ?", [(h,) for h in stale])
+        connection.commit()
+    return len(stale)
+
+
 def load_index(connection: sqlite3.Connection) -> tuple[list[StoredChunk], np.ndarray]:
     """Load every chunk and return its vectors as one L2-normalised matrix.
 
